@@ -14,20 +14,21 @@ pipeline {
 
         stage('Terraform Init') {
             steps {
-                sh 'terraform init'
+                bat 'terraform init'
+
             }
         }
 
         stage('Terraform Plan') {
             steps {
-                sh 'terraform plan -out=tfplan'
+                bat 'terraform plan -out=tfplan'
             }
         }
 
         stage('Terraform Apply') {
             steps {
                 withCredentials([string(credentialsId: 'aws-key-name', variable: 'KEY_NAME')]) {
-                    sh "terraform apply -auto-approve -var 'key_name=${KEY_NAME}' tfplan"
+                    bat"terraform apply -auto-approve -var 'key_name=${KEY_NAME}' tfplan"
                 }
             }
         }
