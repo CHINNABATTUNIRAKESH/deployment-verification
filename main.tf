@@ -1,49 +1,19 @@
 provider "aws" {
-  region = "us-east-1"
+  region = "us-west-2" # Change this to your preferred region
 }
 
-resource "aws_instance" "nginx_server" {
-  ami           = "ami-0c02fb55956c7d316"
-  instance_type = "t2.micro"
-  key_name      = var.key_name
-  security_groups = [aws_security_group.nginx_sg.name]
+resource "aws_instance" "jenkins_server" {
+  ami           = "ami-075686beab831bb7f" # Replace with a valid Ubuntu AMI for your region
+  instance_type = "t2.small"
 
-  user_data = <<-EOF
-              #!/bin/bash
-              yum update -y
-              amazon-linux-extras install nginx1 -y
-              systemctl start nginx
-              systemctl enable nginx
-              echo "Healthy" > /usr/share/nginx/html/health
-              EOF
+  vpc_security_group_ids = ["sg-0a76d30209f78079c"] # Replace with your security group ID
+  key_name               = "default-ec2" # Replace with your key pair name
 
   tags = {
-    Name = "Jenkins-Terraform-Nginx"
+    Name = "Terraform-Jenkins-Server"
   }
 }
 
-resource "aws_security_group" "nginx_sg" {
-  name        = "nginx_sg"
-  description = "Allow HTTP and SSH"
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+output "jenkins_server_ip" {
+  value = aws_instance.jenkins_server.public_ip
 }
